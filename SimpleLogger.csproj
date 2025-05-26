@@ -1,16 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <PackageId>SimpleLogger</PackageId>
-    <Version>1.0</Version>
+    <PackageId>NeoSimpleLogger</PackageId>
+    <Version>1.1</Version>
+    <PackageLicenseUrl>https://www.gnu.org/licenses/gpl-3.0.html</PackageLicenseUrl>
     <Authors>ruzen42</Authors>
     <Description>An Simple Logger .NET library</Description>
     <PackageTags>dotnet, utility, logger</PackageTags>
     <RepositoryUrl>https://github.com/ruzen42/simple-logger</RepositoryUrl>
-    <PackageLicenseExpression>GPL</PackageLicenseExpression>
     <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
 

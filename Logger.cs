@@ -1,49 +1,72 @@
-using System;
+namespace NeoSimpleLogger;
 
-namespace RBoard;
-
-public static class Logger
+public class Logger
 {
-    private const ConsoleColor InfoColor = ConsoleColor.Green;
-    private const ConsoleColor WarnColor = ConsoleColor.Yellow;
-    private const ConsoleColor ErrorColor = ConsoleColor.Red;
-    private const ConsoleColor DebugColor = ConsoleColor.Magenta;
-    private const ConsoleColor TimeColor = ConsoleColor.DarkGray;
+    private readonly ConsoleColor _infoColor;
+    private readonly ConsoleColor _warnColor;
+    private readonly ConsoleColor _errorColor;
+    private readonly ConsoleColor _debugColor;
+    private readonly ConsoleColor _timeColor;
 
-    public static void Error(string message)
+    public Logger()
+    {
+       _infoColor = ConsoleColor.Green; 
+       _warnColor = ConsoleColor.Yellow;
+       _errorColor = ConsoleColor.Red;
+       _debugColor = ConsoleColor.Magenta;
+       _timeColor = ConsoleColor.DarkGray;
+       Info("Logging started");
+    }
+    
+    public Logger(ConsoleColor infoColor, ConsoleColor warnColor, ConsoleColor errorColor, ConsoleColor debugColor, ConsoleColor timeColor)
+    {
+        _infoColor = infoColor; 
+        _warnColor = warnColor; 
+        _errorColor = errorColor; 
+        _debugColor = debugColor; 
+        _timeColor = timeColor; 
+        Info("Logging started");
+    }
+
+    public void Error(string message)
+    {
+        Log("ERROR", message);
+    }
+
+    public void Error(string message, ConsoleColor color)
     {
         Log("ERROR", message);
     }
     
-    public static void Warn(string message)
+    public void Warn(string message)
     {
         Log("WARN", message);
     }
     
-    public static void Debug(string message)
+    public void Debug(string message)
     {
         Log("DEBUG", message);
     }
     
-    public static void Info(string message)
+    public void Info(string message)
     {
         Log("INFO", message);
     }
     
-    private static void Log(string level, string message)
+    private void Log(string level, string message)
     {
         var originalColor = Console.ForegroundColor;
 
-        Console.ForegroundColor = TimeColor;
+        Console.ForegroundColor = _timeColor;
         Console.Write($"[{DateTime.Now:HH:mm:ss.fff}] ");
 
         Console.ForegroundColor = level switch
         {
-            "INFO" => InfoColor,
-            "ERROR" => ErrorColor,
-            "DEBUG" => DebugColor,
-            "WARN" => WarnColor,
-            _ => InfoColor
+            "INFO" => _infoColor,
+            "ERROR" => _errorColor,
+            "DEBUG" => _debugColor,
+            "WARN" => _warnColor,
+            _ => _infoColor
         };
         
         Console.Write($"{level,-5} ");
@@ -52,12 +75,11 @@ public static class Logger
         Console.WriteLine(message);
 
 #if DEBUG
-        if (level is "ERROR" or "WARN")
-        {
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine($"Call stack: {Environment.StackTrace}\n");
-            Console.ForegroundColor = originalColor;
-        }
+        if (level is not ("ERROR" or "WARN")) return;
+        
+        Console.ForegroundColor = ConsoleColor.DarkGray;
+        Console.WriteLine($"Call stack: {Environment.StackTrace}\n");
+        Console.ForegroundColor = originalColor;
 #endif
     }
 }
