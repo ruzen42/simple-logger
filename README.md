@@ -66,7 +66,7 @@ Call stack:    at NeoSimpleLogger.Logger.Debug(String message)
 ## ⚠️ Notes
 - **Color Support**: Requires a terminal or console that supports ANSI escape codes.
 - **Performance**: Minimal overhead due to simple formatting and no external dependencies.
-- **License**: MIT License (see `LICENSE` file).
+- **License**: BSD-3 Clause License (see `LICENSE` file).
 
 ---
 
@@ -76,8 +76,8 @@ Add the `NeoSimpleLogger` namespace to your project. No external packages requir
 ---
 
 ## 📚 License
-[MIT License](https://opensource.org/licenses/MIT)  
-© 2023 Your Name or Organization
+[BSD-3 Clause License]
+© 2025 Ruzen42 
 
 ---
 
