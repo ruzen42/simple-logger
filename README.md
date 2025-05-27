@@ -10,6 +10,7 @@ optional stack trace output in debug mode. Perfect for debugging and monitoring 
 - **Color-Coded Log Levels**:
     - `INFO` (Green)
     - `WARN` (Yellow)
+    - `FATAL` (Red)
     - `ERROR` (Red)
     - `DEBUG` (Magenta)
 - **Customizable Colors**: Define your own color scheme for each log level.
@@ -19,7 +20,7 @@ optional stack trace output in debug mode. Perfect for debugging and monitoring 
 ---
 
 ## 📌 Usage
-### 1. **Default Logger**
+### **Default Logger**
 ```csharp
 using NeoSimpleLogger;
 
@@ -28,17 +29,7 @@ logger.Info("Application started");
 logger.Warn("Low memory detected");
 logger.Error("Critical failure occurred");
 logger.Debug("Debugging internal state");
-```
-
-### 2. **Custom Colors**
-```csharp
-var logger = new Logger(
-    infoColor: ConsoleColor.Cyan,
-    warnColor: ConsoleColor.DarkYellow,
-    errorColor: ConsoleColor.DarkRed,
-    debugColor: ConsoleColor.DarkMagenta,
-    timeColor: ConsoleColor.Gray
-);
+logger.Fatal("App is dead");
 ```
 
 ---
@@ -49,6 +40,7 @@ var logger = new Logger(
 [14:30:45.124] WARN   Low memory detected
 [14:30:45.125] ERROR  Critical failure occurred
 [14:30:45.126] DEBUG  Debugging internal state
+[14:30:45.125] FATAL  App closed unsuccessfuly 
 ```
 
 ---

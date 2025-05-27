@@ -26,10 +26,7 @@ public class Logger
     private readonly ConsoleColor _timeColor;
     private readonly ConsoleColor _fatalColor;
     private readonly TypeLogger _typeLogger;
-    public bool CallStack {
-        get;
-        set;
-    }
+    public bool CallStack { get; set; }
 
     public Logger(TypeLogger typeLogger)
     {
@@ -71,33 +68,33 @@ public class Logger
 
         var originalColor = Console.ForegroundColor;
         var level = type switch
-        {
-          TypeMessage.Info => "INFO",
-          TypeMessage.Error => "ERROR",
-          TypeMessage.Fatal => "FATAL",
-          TypeMessage.Debug => "DEBUG",
-          TypeMessage.Warn => "WARN",
-          _ => "YOUR"
-        };
+    {
+        TypeMessage.Info => "INFO",
+        TypeMessage.Error => "ERROR",
+        TypeMessage.Fatal => "FATAL",
+        TypeMessage.Debug => "DEBUG",
+        TypeMessage.Warn => "WARN",
+        _ => "YOUR" 
+    };
 
-        switch (_typeLogger)
+    switch (_typeLogger)
         {
-          case TypeLogger.Console:
+        case TypeLogger.Console:
             Console.ForegroundColor = _timeColor;
             Console.Write($"[{DateTime.Now:HH:mm:ss.fff}] ");
             Console.ForegroundColor = type switch
             {
-              TypeMessage.Info => _infoColor,
-              TypeMessage.Error => _errorColor,
-              TypeMessage.Fatal => _fatalColor,
-              TypeMessage.Debug => _debugColor,
-              TypeMessage.Warn => _warnColor,
-              _ => _infoColor
+                TypeMessage.Info => _infoColor,
+                TypeMessage.Error => _errorColor,
+                TypeMessage.Fatal => _fatalColor,
+                TypeMessage.Debug => _debugColor,
+                TypeMessage.Warn => _warnColor,
+                _ => _infoColor
             };
             Console.Write($"{level,-5} ");
             Console.ForegroundColor = originalColor;
             Console.WriteLine(message);
-            if (level is not ("ERROR" or "FATAL") || !CallStack) break;
+            if (level is not ("ERROR" or "FATAL") && !CallStack) break;
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine($"Call stack: {Environment.StackTrace}\n");
             Console.ForegroundColor = originalColor;
@@ -106,17 +103,17 @@ public class Logger
             var streamWriter = new StreamWriter($"{Environment.CurrentDirectory}\\{DateTime.Now:yyyy-MM-dd}.log");
             streamWriter.Write($"[{DateTime.Now:HH:mm:ss.fff}] ");
             Console.ForegroundColor = type switch
-        {
-            TypeMessage.Info => _infoColor,
-            TypeMessage.Error => _errorColor,
-            TypeMessage.Fatal => _fatalColor,
-            TypeMessage.Debug => _debugColor,
-            TypeMessage.Warn => _warnColor,
-            _ => _infoColor
-        };
-        streamWriter.Write($"{level,-5} ");
+            {
+                TypeMessage.Info => _infoColor,
+                TypeMessage.Error => _errorColor,
+                TypeMessage.Fatal => _fatalColor,
+                TypeMessage.Debug => _debugColor,
+                TypeMessage.Warn => _warnColor,
+                _ => _infoColor
+            };
+            streamWriter.Write($"{level,-5} ");
             streamWriter.WriteLine(message);
-            if (level is ("ERROR" or "WARN") || !CallStack)
+            if (level is ("ERROR" or "WARN"))
             {
                 streamWriter.WriteLine($"Call stack: {Environment.StackTrace}\n");
             }
@@ -127,7 +124,7 @@ public class Logger
             Console.Write($"{level,-5} ");
             Console.ForegroundColor = originalColor;
             Console.WriteLine(message);
-            if (level is not ("ERROR" or "WARN" or "FATAL") || !CallStack) return;
+            if (level is not ("ERROR" or "WARN" or "FATAL") && !CallStack) return;
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine($"Call stack: {Environment.StackTrace}\n");
             Console.ForegroundColor = originalColor;
