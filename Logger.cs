@@ -33,7 +33,7 @@ public class Logger
 
     public Logger(TypeLogger typeLogger)
     {
-        CallStack = true;
+        CallStack = false;
         _typeLogger = typeLogger;
         _infoColor = ConsoleColor.Green;
         _warnColor = ConsoleColor.Yellow;
