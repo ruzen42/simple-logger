@@ -39,7 +39,7 @@ public class Logger
         _warnColor = ConsoleColor.Yellow;
         _errorColor = ConsoleColor.Red;
         _debugColor = ConsoleColor.Magenta;
-        _timeColor = ConsoleColor.DarkGray;
+        _timeColor = ConsoleColor.White;
         _fatalColor = ConsoleColor.Red;
         Info("Logging started");
     }
