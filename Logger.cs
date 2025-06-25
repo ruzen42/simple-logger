@@ -52,7 +52,6 @@ public class Logger
         DebugColor = debugColor;
         TimeColor = timeColor;
         FatalColor = fatalColor;
-        Info("Logging started");
     }
 
     public void Error(string message) => Log(TypeMessage.Error, message);
