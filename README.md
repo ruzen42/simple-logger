@@ -24,7 +24,7 @@ optional stack trace output in debug mode. Perfect for debugging and monitoring 
 ```csharp
 using NeoSimpleLogger;
 
-var logger = new Logger();
+var logger = new Logger(Logger.OutputType.Console);
 logger.LogInformation("Application started");
 logger.LogWarning("Low memory detected");
 logger.LogError("Critical failure occurred");

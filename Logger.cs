@@ -39,59 +39,58 @@ public class Logger : ILogger
         if (!IsEnabled(logLevel))
             return;
 
-        var level = logLevel switch
-        {
-            LogLevel.Trace => "TRACE",
-            LogLevel.Debug => "DEBUG",
-            LogLevel.Information => "INFO",
-            LogLevel.Warning => "WARN",
-            LogLevel.Error => "ERROR",
-            LogLevel.Critical => "FATAL",
-            _ => "UNKN"
-        };
 
-        var color = logLevel switch
-        {
-            LogLevel.Information => InfoColor,
-            LogLevel.Warning => WarnColor,
-            LogLevel.Error => ErrorColor,
-            LogLevel.Critical => FatalColor,
-            LogLevel.Debug => DebugColor,
-            _ => ConsoleColor.Gray
-        };
-
-        var logMessage = $"{level,-5} {message}";
         
         if (logLevel is LogLevel.Error or LogLevel.Critical && IncludeCallStack)
         {
-            logMessage += $"\nCall stack: {Environment.StackTrace}";
+            message += $"\nCall stack: {Environment.StackTrace}";
         }
 
         lock (_lock)
         {
             if (LogOutputType is OutputType.Console or OutputType.ConsoleAndFile)
             {
-                WriteToConsole(logMessage, color);
+                WriteToConsole(logLevel, message);
             }
 
             if (LogOutputType is OutputType.File or OutputType.ConsoleAndFile)
             {
-                WriteToFile(logMessage);
+                WriteToFile(message);
             }
         }
     }
 
-    private void WriteToConsole(string message, ConsoleColor color)
+    private void WriteToConsole(LogLevel level, string message)
     {
         var originalColor = Console.ForegroundColor;
         
         Console.ForegroundColor = TimeColor;
         Console.Write($"[{DateTime.Now:HH:mm:ss.fff}] ");
         
-        Console.ForegroundColor = color;
-        Console.WriteLine(message);
+        Console.ForegroundColor = level switch
+        {
+            LogLevel.Critical => FatalColor, 
+            LogLevel.Error => ErrorColor,
+            LogLevel.Warning => WarnColor, 
+            LogLevel.Information => InfoColor, 
+            LogLevel.Debug => DebugColor, 
+            _ => InfoColor
+        };
         
+        var output = level switch
+        {
+            LogLevel.Critical => "FATAL",
+            LogLevel.Error => "ERROR",
+            LogLevel.Warning => "WARN",
+            LogLevel.Information => "INFO",
+            LogLevel.Debug => "DEBUG",
+            LogLevel.Trace => "TRACE",
+            _ => "UNKN"
+        };
+        Console.Write(output + " ");
         Console.ForegroundColor = originalColor;
+        
+        Console.WriteLine(message);
     }
 
     private void WriteToFile(string message) => _fileWriter!.WriteLine(message);
@@ -112,10 +111,8 @@ public class Logger : ILogger
 
     public bool IsEnabled(LogLevel logLevel) => true;
 
-    public IDisposable BeginScope<TState>(TState state) where TState : notnull
-    {
-        return NullScope.Instance;
-    }
+    public IDisposable BeginScope<TState>(TState state) where TState : notnull => 
+        NullScope.Instance;
 
     private class NullScope : IDisposable
     {
