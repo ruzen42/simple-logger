@@ -12,8 +12,8 @@ public class Logger : ILogger
         ConsoleAndFile,
     }
 
-    private readonly object _lock = new();
-    private readonly StreamWriter _fileWriter;
+    private readonly Lock _lock = new();
+    private readonly StreamWriter? _fileWriter;
 
     public ConsoleColor InfoColor { get; set; } = ConsoleColor.Green;
     public ConsoleColor WarnColor { get; set; } = ConsoleColor.Yellow;
@@ -104,10 +104,7 @@ public class Logger : ILogger
         Console.ForegroundColor = originalColor;
     }
 
-    private void WriteToFile(string message)
-    {
-        _fileWriter.WriteLine(message);
-    }
+    private void WriteToFile(string message) => _fileWriter!.WriteLine(message);
 
     public void Log<TState>(
         LogLevel logLevel,
