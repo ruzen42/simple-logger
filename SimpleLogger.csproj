@@ -13,6 +13,7 @@
     <PackageTags>dotnet, utility, logger</PackageTags>
     <RepositoryUrl>https://github.com/ruzen42/simple-logger</RepositoryUrl>
     <PackageIcon>icon.png</PackageIcon>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

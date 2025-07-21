@@ -28,11 +28,9 @@ public class Logger : ILogger
     {
         LogOutputType = outputType;
 
-        if (outputType is OutputType.File or OutputType.ConsoleAndFile)
-        {
-            var logFilePath = Path.Combine(Environment.CurrentDirectory, $"{DateTime.Now:yyyy-MM-dd}.log");
-            _fileWriter = new StreamWriter(logFilePath, append: true) { AutoFlush = true };
-        }
+        if (outputType is not (OutputType.File or OutputType.ConsoleAndFile)) return;
+        var logFilePath = Path.Combine(Environment.CurrentDirectory, $"{DateTime.Now:yyyy-MM-dd}.log");
+        _fileWriter = new StreamWriter(logFilePath, append: true) { AutoFlush = true };
 
     }
 
