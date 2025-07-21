@@ -25,11 +25,11 @@ optional stack trace output in debug mode. Perfect for debugging and monitoring 
 using NeoSimpleLogger;
 
 var logger = new Logger();
-logger.Info("Application started");
-logger.Warn("Low memory detected");
-logger.Error("Critical failure occurred");
-logger.Debug("Debugging internal state");
-logger.Fatal("App is dead");
+logger.LogInformation("Application started");
+logger.LogWarning("Low memory detected");
+logger.LogError("Critical failure occurred");
+logger.LogDebug("Debugging internal state");
+logger.LogCritical("App is dead");
 ```
 
 ---
