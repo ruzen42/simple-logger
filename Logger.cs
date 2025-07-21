@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using static System.GC;
 
 namespace NeoSimpleLogger;
 
@@ -12,7 +13,6 @@ public class Logger : ILogger
     }
 
     private readonly object _lock = new();
-    private readonly string _logFilePath;
     private readonly StreamWriter _fileWriter;
 
     public ConsoleColor InfoColor { get; set; } = ConsoleColor.Green;
@@ -27,11 +27,11 @@ public class Logger : ILogger
     public Logger(OutputType outputType)
     {
         LogOutputType = outputType;
-        
-        if (outputType == OutputType.File || outputType == OutputType.ConsoleAndFile)
+
+        if (outputType is OutputType.File or OutputType.ConsoleAndFile)
         {
-            _logFilePath = Path.Combine(Environment.CurrentDirectory, $"{DateTime.Now:yyyy-MM-dd}.log");
-            _fileWriter = new StreamWriter(_logFilePath, append: true) { AutoFlush = true };
+            var logFilePath = Path.Combine(Environment.CurrentDirectory, $"{DateTime.Now:yyyy-MM-dd}.log");
+            _fileWriter = new StreamWriter(logFilePath, append: true) { AutoFlush = true };
         }
 
         Info("Logging started");
@@ -70,9 +70,9 @@ public class Logger : ILogger
             _ => ConsoleColor.Gray
         };
 
-        var logMessage = $"[{DateTime.Now:HH:mm:ss.fff}] {level,-5} {message}";
+        var logMessage = $"{level,-5} {message}";
         
-        if ((logLevel == LogLevel.Error || logLevel == LogLevel.Critical) && IncludeCallStack)
+        if (logLevel is LogLevel.Error or LogLevel.Critical && IncludeCallStack)
         {
             logMessage += $"\nCall stack: {Environment.StackTrace}";
         }
@@ -138,7 +138,12 @@ public class Logger : ILogger
 
     public void Dispose()
     {
-        _fileWriter?.Dispose();
-        GC.SuppressFinalize(this);
+        lock (_lock)
+        {
+            _fileWriter?.Dispose();
+#pragma warning disable CA1816
+            SuppressFinalize(this);
+#pragma warning restore CA1816
+        }
     }
 }
