@@ -34,15 +34,7 @@ public class Logger : ILogger
             _fileWriter = new StreamWriter(logFilePath, append: true) { AutoFlush = true };
         }
 
-        Info("Logging started");
     }
-
-    public void Error(string message) => Log(LogLevel.Error, message);
-    public void Fatal(string message) => Log(LogLevel.Critical, message);
-    public void Warn(string message) => Log(LogLevel.Warning, message);
-    public void Debug(string message) => Log(LogLevel.Debug, message);
-    public void Info(string message) => Log(LogLevel.Information, message);
-    public void Trace(string message) => Log(LogLevel.Trace, message);
 
     private void Log(LogLevel logLevel, string message)
     {
