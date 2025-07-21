@@ -1,131 +1,144 @@
+using Microsoft.Extensions.Logging;
+
 namespace NeoSimpleLogger;
 
-public class Logger
+public class Logger : ILogger
 {
-    public enum TypeLogger
+    public enum OutputType
     {
         Console,
         File,
         ConsoleAndFile,
     }
 
-    private enum TypeMessage
-    {
-        Warn,
-        Error,
-        Info,
-        Debug,
-        Fatal,
-    }
+    private readonly object _lock = new();
+    private readonly string _logFilePath;
+    private readonly StreamWriter _fileWriter;
 
-    public ConsoleColor InfoColor;
-    public ConsoleColor WarnColor;
-    public ConsoleColor ErrorColor;
-    public ConsoleColor DebugColor;
-    public ConsoleColor TimeColor;
-    public ConsoleColor FatalColor;
-    public TypeLogger _typeLogger;
-    public bool CallStack {
-        get;
-        set;
-    }
+    public ConsoleColor InfoColor { get; set; } = ConsoleColor.Green;
+    public ConsoleColor WarnColor { get; set; } = ConsoleColor.Yellow;
+    public ConsoleColor ErrorColor { get; set; } = ConsoleColor.Red;
+    public ConsoleColor DebugColor { get; set; } = ConsoleColor.Magenta;
+    public ConsoleColor TimeColor { get; set; } = ConsoleColor.White;
+    public ConsoleColor FatalColor { get; set; } = ConsoleColor.Red;
+    public bool IncludeCallStack { get; set; }
+    public OutputType LogOutputType { get; }
 
-    public Logger(TypeLogger typeLogger)
+    public Logger(OutputType outputType)
     {
-        CallStack = false;
-        _typeLogger = typeLogger;
-        InfoColor = ConsoleColor.Green;
-        WarnColor = ConsoleColor.Yellow;
-        ErrorColor = ConsoleColor.Red;
-        DebugColor = ConsoleColor.Magenta;
-        TimeColor = ConsoleColor.White;
-        FatalColor = ConsoleColor.Red;
+        LogOutputType = outputType;
+        
+        if (outputType == OutputType.File || outputType == OutputType.ConsoleAndFile)
+        {
+            _logFilePath = Path.Combine(Environment.CurrentDirectory, $"{DateTime.Now:yyyy-MM-dd}.log");
+            _fileWriter = new StreamWriter(_logFilePath, append: true) { AutoFlush = true };
+        }
+
         Info("Logging started");
     }
 
-    public Logger(TypeLogger typeLogger, ConsoleColor  infoColor, ConsoleColor  warnColor, ConsoleColor  errorColor, ConsoleColor  debugColor, ConsoleColor  timeColor, ConsoleColor  fatalColor)
+    public void Error(string message) => Log(LogLevel.Error, message);
+    public void Fatal(string message) => Log(LogLevel.Critical, message);
+    public void Warn(string message) => Log(LogLevel.Warning, message);
+    public void Debug(string message) => Log(LogLevel.Debug, message);
+    public void Info(string message) => Log(LogLevel.Information, message);
+    public void Trace(string message) => Log(LogLevel.Trace, message);
+
+    private void Log(LogLevel logLevel, string message)
     {
-        _typeLogger = typeLogger;
-        InfoColor = infoColor;
-        WarnColor = warnColor;
-        ErrorColor = errorColor;
-        DebugColor = debugColor;
-        TimeColor = timeColor;
-        FatalColor = fatalColor;
-    }
+        if (!IsEnabled(logLevel))
+            return;
 
-    public void Error(string message) => Log(TypeMessage.Error, message);
-
-    public void Fatal(string message) => Log(TypeMessage.Fatal, message);
-
-    public void Warn(string message) => Log(TypeMessage.Warn, message);
-
-    public void Debug(string message) => Log(TypeMessage.Debug, message);
-
-    public void Info(string message) => Log(TypeMessage.Info, message);
-
-    private void Log(TypeMessage type, string message)
-    {
-
-        var originalColor = Console.ForegroundColor;
-        var level = type switch
+        var level = logLevel switch
         {
-          TypeMessage.Info => "INFO",
-          TypeMessage.Error => "ERROR",
-          TypeMessage.Fatal => "FATAL",
-          TypeMessage.Debug => "DEBUG",
-          TypeMessage.Warn => "WARN",
-          _ => "YOUR"
+            LogLevel.Trace => "TRACE",
+            LogLevel.Debug => "DEBUG",
+            LogLevel.Information => "INFO",
+            LogLevel.Warning => "WARN",
+            LogLevel.Error => "ERROR",
+            LogLevel.Critical => "FATAL",
+            _ => "UNKN"
         };
 
-        switch (_typeLogger)
+        var color = logLevel switch
         {
-            case TypeLogger.ConsoleAndFile:
-            case TypeLogger.Console:
+            LogLevel.Information => InfoColor,
+            LogLevel.Warning => WarnColor,
+            LogLevel.Error => ErrorColor,
+            LogLevel.Critical => FatalColor,
+            LogLevel.Debug => DebugColor,
+            _ => ConsoleColor.Gray
+        };
+
+        var logMessage = $"[{DateTime.Now:HH:mm:ss.fff}] {level,-5} {message}";
+        
+        if ((logLevel == LogLevel.Error || logLevel == LogLevel.Critical) && IncludeCallStack)
+        {
+            logMessage += $"\nCall stack: {Environment.StackTrace}";
+        }
+
+        lock (_lock)
+        {
+            if (LogOutputType is OutputType.Console or OutputType.ConsoleAndFile)
             {
-                Console.ForegroundColor = TimeColor;
-                Console.Write($"[{DateTime.Now:HH:mm:ss.fff}] ");
-                Console.ForegroundColor = type switch
-                {
-                  TypeMessage.Info => InfoColor,
-                  TypeMessage.Error => ErrorColor,
-                  TypeMessage.Fatal => FatalColor,
-                  TypeMessage.Debug => DebugColor,
-                  TypeMessage.Warn => WarnColor,
-                  _ => InfoColor
-                };
-                Console.Write($"{level,-5} ");
-                Console.ForegroundColor = originalColor;
-                Console.WriteLine(message);
-                if (level is not ("ERROR" or "FATAL") || !CallStack) break;
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine($"Call stack: {Environment.StackTrace}\n");
-                Console.ForegroundColor = originalColor;
-                break;
-            }
-            case TypeLogger.File:
-            {
-                var streamWriter = new StreamWriter($"{Environment.CurrentDirectory}\\{DateTime.Now:yyyy-MM-dd}.log");
-                streamWriter.Write($"[{DateTime.Now:HH:mm:ss.fff}] ");
-                Console.ForegroundColor = type switch
-                {
-                    TypeMessage.Info => InfoColor,
-                    TypeMessage.Error => ErrorColor,
-                    TypeMessage.Fatal => FatalColor,
-                    TypeMessage.Debug => DebugColor,
-                    TypeMessage.Warn => WarnColor,
-                    _ => InfoColor
-                };
-                streamWriter.Write($"{level,-5} ");
-                streamWriter.WriteLine(message);
-                if (level is ("ERROR" or "WARN") || !CallStack)
-                    streamWriter.WriteLine($"Call stack: {Environment.StackTrace}\n");
-                break;              
+                WriteToConsole(logMessage, color);
             }
 
-        default:
-            throw new ArgumentOutOfRangeException();
+            if (LogOutputType is OutputType.File or OutputType.ConsoleAndFile)
+            {
+                WriteToFile(logMessage);
+            }
         }
     }
 
+    private void WriteToConsole(string message, ConsoleColor color)
+    {
+        var originalColor = Console.ForegroundColor;
+        
+        Console.ForegroundColor = TimeColor;
+        Console.Write($"[{DateTime.Now:HH:mm:ss.fff}] ");
+        
+        Console.ForegroundColor = color;
+        Console.WriteLine(message);
+        
+        Console.ForegroundColor = originalColor;
+    }
+
+    private void WriteToFile(string message)
+    {
+        _fileWriter.WriteLine(message);
+    }
+
+    public void Log<TState>(
+        LogLevel logLevel,
+        EventId eventId,
+        TState state,
+        Exception? exception,
+        Func<TState, Exception?, string> formatter)
+    {
+        if (!IsEnabled(logLevel))
+            return;
+
+        var message = formatter(state, exception);
+        Log(logLevel, message);
+    }
+
+    public bool IsEnabled(LogLevel logLevel) => true;
+
+    public IDisposable BeginScope<TState>(TState state) where TState : notnull
+    {
+        return NullScope.Instance;
+    }
+
+    private class NullScope : IDisposable
+    {
+        public static NullScope Instance { get; } = new();
+        public void Dispose() { }
+    }
+
+    public void Dispose()
+    {
+        _fileWriter?.Dispose();
+        GC.SuppressFinalize(this);
+    }
 }
