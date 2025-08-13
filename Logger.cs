@@ -37,15 +37,10 @@ public class Logger : ILogger
 
     private void Log(LogLevel logLevel, string message)
     {
-        if (!IsEnabled(logLevel))
-            return;
-
-
+        if (!IsEnabled(logLevel)) return;
         
         if (logLevel is LogLevel.Error or LogLevel.Critical && IncludeCallStack)
-        {
             message += $"\nCall stack: {Environment.StackTrace}";
-        }
 
         lock (_lock)
         {
