@@ -33,7 +33,7 @@ public class Logger : ILogger
         _fileWriter = new StreamWriter(logFilePath, append: true) { AutoFlush = true };
     }
 
-    public Logger() => new Logger(OutputType.Console);
+    public Logger() => LogOutputType = OutputType.Console;
 
     private void Log(LogLevel logLevel, string message)
     {

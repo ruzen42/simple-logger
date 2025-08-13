@@ -10,5 +10,9 @@ public class LoggerProvider : ILoggerProvider
     public ILogger CreateLogger(string categoryName) =>
         _loggers.GetOrAdd("SimpleLogger", new Logger(Logger.OutputType.Console));
 
-    public void Dispose() => _loggers.Clear();
+    public void Dispose()
+    {
+        _loggers.Clear();   
+        GC.SuppressFinalize(this);
+    }
 }
