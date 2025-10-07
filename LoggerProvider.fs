@@ -5,25 +5,8 @@ open System.Collections.Concurrent
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.Options
 
-type OutputType =
-    | Console = 0
-    | File = 1
-
-[<CLIMutable>]
-type LoggerOptions() =
-    member val OutputType = OutputType.Console with get, set
-
-type Logger(categoryName: string, options: LoggerOptions) =
-    interface ILogger with
-        member _.Log(logLevel, eventId, state, exception, formatter) =
-            ()
-        member _.IsEnabled(logLevel) = true
-        member _.BeginScope<'TState>(state: 'TState) =
-            { new IDisposable with member _.Dispose() = () }
-
-
 [<Sealed>]
-type LoggerProvider =
+public type LoggerProvider =
     let _loggers = new ConcurrentDictionary<string, ILogger>()
     let mutable _currentOptions: LoggerOptions = null
     let mutable _onChangeToken: IDisposable option = None

@@ -3,12 +3,12 @@ open System
 open System.IO
 open System.Threading
 
-type OutputType =
+public type OutputType =
     | Console
     | File
     | ConsoleAndFile
 
-type Logger(outputType: OutputType) =
+public type Logger(outputType: OutputType) =
     let lockObj = obj()
     let mutable fileWriter: StreamWriter option = None
     
